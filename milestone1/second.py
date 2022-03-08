@@ -9,50 +9,50 @@ workflow= yaml.load(a_yaml_file, Loader=yaml.SafeLoader)
 
 file = open("log1.txt","w")
 threads= []
-def flow(work, execution, activities):
+def flow(obj, execution, activities):
     if execution == "sequential":
-        for act in activities:
+        for n in activities:
             now = datetime.now()
-            file.write(f"{now};{work}.{act} Entry\n")
-            if activities[act]['Type'] == "Flow":
-                newwork = work + '.' + act
-                flow(newwork,activities[act]['Execution'],activities[act]['Activities'])
-            elif activities[act]['Type'] == "Task":
-                newwork = work + '.' + act
-                task(newwork,activities[act]['function'],activities[act]['Inputs'])
+            file.write(f"{now};{obj}.{n} Entry\n")
+            if activities[n]['Type'] == "Flow":
+                newwork = obj + '.' + n
+                flow(newwork,activities[n]['Execution'],activities[n]['Activities'])
+            elif activities[n]['Type'] == "Task":
+                newwork = obj + '.' + n
+                task(newwork,activities[n]['function'],activities[n]['Inputs'])
             now= datetime.now()
-            file.write(f"{now};{work}.{act} Exit\n")
+            file.write(f"{now};{obj}.{n} Exit\n")
     if execution == "Concurrent":
-        for act in activities:
+        for n in activities:
             now = datetime.now()
-            file.write(f"{now};{work}.{act} Entry\n")
-            if activities[act]['Type'] == "Flow":
-                newwork = work + '.' + act 
-                thread = threading.Thread(target=flow,args=[newwork,activities[act]['Execution'],activities[act]['Activities']])
+            file.write(f"{now};{obj}.{n} Entry\n")
+            if activities[n]['Type'] == "Flow":
+                newwork = obj + '.' + n 
+                thread = threading.Thread(target=flow,args=[newwork,activities[n]['Execution'],activities[n]['Activities']])
                 thread.start()
                 thread.append({thread,newwork})
-            elif  activities[act]['Type'] == "Task":
-                newwork = work + '.' + act
-                thread = threading.Thread(target=task,args=[newwork,activities[act]['Function'],activities[act]['Inputs']])  
+            elif  activities[n]['Type'] == "Task":
+                newwork = obj + '.' + n
+                thread = threading.Thread(target=task,args=[newwork,activities[n]['Function'],activities[n]['Inputs']])  
                 thread.start()
                 thread.append({thread,newwork}) 
             now = datetime.now()
             for thread in threads:
                 thread.join()
-            file.write(f"{now};{work}.{act} Exit\n")
-    def task(work,function,inputs):
+            file.write(f"{now};{obj}.{n} Exit\n")
+    def task(obj,function,inputs):
         if function == 'TimeFunction':
           fun_input = inputs['FunctionInput']  
           exc_time =inputs['ExecutionTime']
         now = datetime.now()
-        file.write(f"{now};{work} Executing {function} ({fun_input}), {exc_time})\n")
+        file.write(f"{now};{obj} Executing {function} ({fun_input}), {exc_time})\n")
         time.sleep(int(exc_time))
-for work in workflow:
+for obj in workflow:
         now = datetime.now()
-        file.write(F"{now};{work} Entry\n")
-        if workflow[work]['Type'] == "flow":
-            flow(work,workflow[work]['Execution'],workflow[work]['Activities'])
-        elif workflow[work]['Type'] == "Task":
-            task(work,workflow[work]['function'],workflow[work]['Inputs'])   
+        file.write(F"{now};{obj} Entry\n")
+        if workflow[obj]['Type'] == "flow":
+            flow(obj,workflow[obj]['Execution'],workflow[obj]['Activities'])
+        elif workflow[obj]['Type'] == "Task":
+            task(obj,workflow[obj]['function'],workflow[obj]['Inputs'])   
         now = datetime.now()
-        file.write(f"{now};{work} Exit")    
+        file.write(f"{now};{obj} Exit")    
